@@ -12,6 +12,7 @@ def delete_data(key, dict_keys):
         return f"202, {key} is deleted"
     return f"{key} does not exist in the database"
 
+
 def post_data(par1, par2, par3, par4, key2, key3, key4, dict_data, put):
     if put == 0:
         if par1 not in dict_data.keys():
@@ -23,6 +24,7 @@ def post_data(par1, par2, par3, par4, key2, key3, key4, dict_data, put):
             dict_data[par1] = {f"{key2}": par2, f"{key3}": par3, f"{key4}": par4}
             return "202", {par1: dict_data[par1]}
         return f"{par1} does not exist in the database"
+
 
 class Car(object):
     def __init__(self, vin, model=None, brand=None, year=None):
@@ -69,6 +71,7 @@ def append_car(vin, brand, model, year):
             return car.errors
     return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 0)
 
+
 @app.delete('/delete/car/{vin}')
 def delete_car(vin):
     return delete_data(vin, cars)
@@ -91,10 +94,42 @@ def update_data_car(vin, brand, model, year):
 
 peoples = {}
 
+class People(object):
+    def __init__(self, phone, name=None, second_name=None, address=None):
+        self.phone = phone
+        self.name = name.capitalize()
+        self.second_name = second_name.capitalize()
+        self.address = address.capitalize()
+        self.errors = {"phone": "valid", "name": "valid", "second_name": "valid", "address": "valid"}
+
+    def valid_sym(self, string):
+        error_syms = "_/€&#@%~;:|[] <>{}^*-+=(),"
+        for x in error_syms:
+            if x in string:
+                return False
+        return True
+
+    def valid_people(self):
+        if not(self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not(self.valid_sym(self.phone[1:])):
+            self.errors["phone"] = "Номер должен начинаться с + и содержать 10 цифр"
+
+        if not(self.valid_sym(self.name)) or not(self.name.isalpha()) or len(self.name) < 3:
+            self.errors["name"] = "Имя не должно содержать спец. символы и цифры, длина имени 3 сим. минимум"
+
+        if not(self.valid_sym(self.second_name)) or not(self.second_name.isalpha()) or len(self.second_name) < 3:
+            self.errors["second_name"] = "Фамилия не должна содержать спец. символы и цифры, длина фамилии 3 сим. минимум"
+
+        if len(self.address) < 10:
+            self.errors["address"] = "Адрес должен содержать не менее 10 символов"
 
 @app.post("/people/{phone}/{name}/{second_name}/{address}/")
 def append_people(phone, name, second_name, address):
-    return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 0)
+    pep = People(phone, name, second_name, address)
+    pep.valid_people()
+    for i in pep.errors:
+        if pep.errors[i] != "valid":
+            return pep.errors
+    return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 0)
 
 
 @app.delete("/delete/people/{phone}")
@@ -106,6 +141,12 @@ def delete_people(phone):
 def read_data_peoples():
     return peoples
 
+
 @app.put("/update/people/{phone}/{name}/{second_name}/{address}/")
 def update_data_people(phone, name, second_name, address):
-    return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 1)
+    pep = People(phone, name, second_name, address)
+    pep.valid_people()
+    for i in pep.errors:
+        if pep.errors[i] != "valid":
+            return pep.errors
+    return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 1)
