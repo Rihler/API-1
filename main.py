@@ -93,9 +93,8 @@ peoples = {}
 
 
 @app.post("/people/{phone}/{name}/{second_name}/{address}/")
-def append_people(name, second_name, address, phone):
-    peoples[phone] = [name, second_name, address]
-    return "202", {phone: peoples[phone]}
+def append_people(phone, name, second_name, address):
+    return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 0)
 
 
 @app.delete("/delete/people/{phone}")
@@ -107,4 +106,6 @@ def delete_people(phone):
 def read_data_peoples():
     return peoples
 
-@app.put("/update/people/{phone}/")
+@app.put("/update/people/{phone}/{name}/{second_name}/{address}/")
+    def update_data_people(phone, name, second_name, address):
+        return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 1)
