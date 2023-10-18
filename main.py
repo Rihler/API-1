@@ -11,7 +11,7 @@ cars = {}
 
 class Car():
     def __init__(self, vin, model=None, brand=None, year=None):
-        self.vin = vin
+        self.vin = vin.upper()
         self.model = model
         self.brand = brand
         self.year = year
