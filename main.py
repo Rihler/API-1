@@ -107,5 +107,5 @@ def read_data_peoples():
     return peoples
 
 @app.put("/update/people/{phone}/{name}/{second_name}/{address}/")
-    def update_data_people(phone, name, second_name, address):
-        return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 1)
+def update_data_people(phone, name, second_name, address):
+    return post_data(phone, name, second_name, address, "Name", "second_name", "Address", peoples, 1)
