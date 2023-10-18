@@ -150,3 +150,26 @@ def update_data_people(phone, name, second_name, address):
         if pep.errors[i] != "valid":
             return pep.errors
     return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 1)
+
+order = []
+
+@app.post("/order/{phone}/{vin}/{date}/{work}/{status}")
+def append_people(phone, vin, date, work, status):
+    st = {phone: {"vin": vin, "date": date, "work": work, "status": status}}
+    order.append(st)
+
+
+@app.delete("/delete/order/{phone}/{vin}")
+def delete_order(phone, vin):
+    del order[phone][vin]
+
+
+@app.get("/read/order/{phone}/{vin}")
+def read_data_order(phone, vin):
+    for x in order:
+        if x == phone and x[phone] == vin:
+            return {peoples[phone]: x[phone]}
+    return "Данного закаказа нет"
+
+@app.put("/update/order/{phone}/{vin}/{status}/")
+def update_order(phone, vin, status):
