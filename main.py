@@ -111,7 +111,7 @@ class People(object):
 
     def valid_people(self):
         if not(self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not(self.valid_sym(self.phone[1:])):
-            self.errors["phone"] = "Номер должен начинаться с + и содержать 10 цифр"
+            self.errors["phone"] = "Номер должен начинаться с + и содержать 11 цифр"
 
         if not(self.valid_sym(self.name)) or not(self.name.isalpha()) or len(self.name) < 3:
             self.errors["name"] = "Имя не должно содержать спец. символы и цифры, длина имени 3 сим. минимум"
@@ -151,25 +151,79 @@ def update_data_people(phone, name, second_name, address):
             return pep.errors
     return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 1)
 
-order = []
+orders = []
 
+class Order(object):
+    def __init__(self, phone, vin, date, work, status):
+            self.lst_status=["завершен", "в процессе", "ожидает ремонта"]
+            self.phone = phone
+            self.vin = vin.upper()
+            self.date = date
+            self.work = work.lower()
+            self.status = status.lower()
+            self.errors = {"phone": "valid", "vin": "valid", "date": "valid", "work": "valid", "status": "valid"}
+    def valid_sym(self, string):
+        error_syms = "_/€&#@%~;:|[] <>{}^*-+=(),"
+        for x in error_syms:
+            if x in string:
+                return False
+        return True
+
+    def valid_order(self):
+        if not (self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not (
+        self.valid_sym(self.phone[1:])):
+            self.errors["phone"] = "Номер должен начинаться с + и содержать 11 цифр"
+
+        if len(self.vin) != 17 or "I" in self.vin or "O" in self.vin or "Q" in self.vin or not (
+                self.valid_sym(self.vin)):
+            self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
+ и его длина должна быть 17 символов"
+
+        if self.status not in self.lst_status:
+            self.errors["status"] = 'Статус может быть только \"завершен\", \"в процессе\", \"ожидает ремонта\" '
+
+        date1= self.date.replace(" ","").split(".")
+        if len(date1) != 3:
+            self.errors["date"] = "Дата должна иметь формат день.номер_месяца.год"
+        if len(date1) == 3:
+            if not(date1[0].isdigit()) or not(date1[1].isdigit()) or not(date1[2].isdigit()):
+                self.errors["date"] = "Дата должна иметь формат день.номер_месяца.год"
+        if len(date1) == 3 and date1[0].isdigit() and date1[1].isdigit() and date1[0].isdigit():
+            if not(1<=int(date1[0]) <= 31) or (1<=(date1[1]) <=12) or  not(1950 <= date1[2] <=2023):
+                self.errors["date"] = "Месяц должен быть в пределах (1, 31), месяц - (1,12), год - (1950, 2023)"
 @app.post("/order/{phone}/{vin}/{date}/{work}/{status}")
-def append_people(phone, vin, date, work, status):
+def append_order(phone, vin, date, work, status):
+    order = Order(phone, vin, date, work, status)
+    for i in order.errors:
+        if order.errors[i] != "valid":
+            return order.errors
     st = {phone: {"vin": vin, "date": date, "work": work, "status": status}}
-    order.append(st)
+    a = []
+    for x in orders:
+        for y in x:
+            a.append(x[y]["vin"])
+        if vin in a:
+            return "Заказ на данный автомобиль уже существует"
+    if st not in orders:
+        orders.append(st)
+        return st
+    return "Данный заказ уже существует"
 
 
 @app.delete("/delete/order/{phone}/{vin}")
 def delete_order(phone, vin):
-    del order[phone][vin]
+    order = Order(phone, vin)
+    for i in order.errors:
+        if order.errors[i] != "valid":
+            return order.errors
+
+
 
 
 @app.get("/read/order/{phone}/{vin}")
 def read_data_order(phone, vin):
-    for x in order:
+    for x in orders:
         if x == phone and x[phone] == vin:
             return {peoples[phone]: x[phone]}
     return "Данного закаказа нет"
 
-@app.put("/update/order/{phone}/{vin}/{status}/")
-def update_order(phone, vin, status):
