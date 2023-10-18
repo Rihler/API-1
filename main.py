@@ -9,17 +9,28 @@ order = {}
 cars = {}
 
 
-@app.get('/{vin}}/{brand}/{model}/{year}')
-def append_cars(brand: str, model: str, year: int, vin: int):
+@app.post('/car/{vin}/{brand}/{model}/{year}')
+def append_car(vin: int, model: str, brand: str, year: int):
     cars[str(vin)] = {"Model": model, "Brand": brand, "Year": year}
-    return "202", {model: cars[str(vin)]}
+    return "202", {str(vin): cars[str(vin)]}
 
 
-@app.get('/delete/{vin}')
+@app.delete('/delete/{vin}')
 def delete_car(vin: int):
-    del cars[str(vin)]
+    if str(vin) in cars.keys():
+        vin1 = vin
+        del cars[str(vin)]
+        return f"202, {vin1} is deleted"
+    return f"{vin} does not exist in the database"
+
+@app.get('/read/cars/')
+def read_data_car():
+    return cars
 
 
-@app.get('/read/car/{vin}')
-def read_data_car(vin: int):
-    return cars[str(vin)]
+@app.put("/update/car/{vin}/")
+def update_data_car(vin: int, model: str, brand: str, year: int):
+    if str(vin) in cars.keys():
+        cars[str(vin)] = {"Model": model, "Brand": brand, "Year": year}
+        return "202", {model: cars[str(vin)], "vin": vin}
+    return f"{vin} does not exist in the database"
