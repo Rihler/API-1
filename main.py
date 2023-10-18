@@ -18,7 +18,7 @@ class Car():
         self.errors = {"vin": "valid", "model": "valid", "brand": "valid", "year": "valid"}
 
     def valid_sym(self, string):
-        error_syms = "_/€&#@ %~;:|[] <>{} *-+=()"
+        error_syms = "_/€&#@%~;:|[] <>{}^*-+=()"
         for x in error_syms:
             if x in string:
                 return False
@@ -27,12 +27,17 @@ class Car():
     def valid_car(self):
         if len(self.vin) != 17 or "I" in self.vin or "O" in self.vin or "Q" in self.vin or not (self.valid_sym(self.vin)):
             self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
-и его длина должна быть 17 символов"
-        if self.brand.isdigit() or not (self.brand[0].isalpha()) or not (self.valid_sym(self.brand)):
+ и его длина должна быть 17 символов"
+        if not(self.brand.isdigit()) or not(self.brand[0].isalpha()) or not(self.valid_sym(self.brand)):
             self.errors["brand"] = "Марка не должна содержать спец.\
-             символы и цифры и не должна начинаться с цифр "
-        if not (self.year.isdigit()) and not (1950 < int(self.year) <= 2023):
+символы и цифры и не должна начинаться с цифр "
+        flag = True
+        if not(self.year.isdigit()):
             self.errors["year"] = "Год должен быть числом от 1950 до 2023 включительно"
+            flag = False
+        if flag:
+            if not(1950 < int(self.year) <= 2023):
+                self.errors["year"] = "Год должен быть числом от 1950 до 2023 включительно"
         if not (self.valid_sym(self.model)):
             self.errors["vin"] = "Модель не должна содержать спец. символы"
 
@@ -47,7 +52,8 @@ def append_car(vin, brand, model, year):
     for i in car.errors:
         if car.errors[i] != "valid":
             flag = False
-    if not(flag):
+            break
+    if flag == 0:
         return car.errors
     if str(vin) not in cars.keys():
         cars[str(vin)] = {"Model": model.lower(), "Brand": brand.lower(), "Year": year}
