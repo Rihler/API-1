@@ -9,8 +9,8 @@ order = {}
 cars = {}
 
 
-class Car(object):
-    def _init_(self, vin, model, brand, year):
+class Car():
+    def __init__(self, vin, model = None, brand = None, year = None):
         self.vin = vin
         self.model = model
         self.brand = brand
@@ -41,9 +41,11 @@ class Car(object):
 
 @app.post('/car/{vin}/{brand}/{model}/{year}')
 def append_car(vin, brand, model, year):
-    car = Car(vin = vin, model = model, brand = brand, year = year)
+    car = Car(vin, model, brand, year)
     car.valid_car()
-
+    for i in car.errors:
+        if car.errors[i] != "valid":
+            return car.errors
     if str(vin) not in cars.keys():
         cars[str(vin)] = {"Model": model.lower(), "Brand": brand.lower(), "Year": year}
         return "202", {str(vin): cars[str(vin)]}
@@ -51,7 +53,8 @@ def append_car(vin, brand, model, year):
 
 
 @app.delete('/delete/{vin}')
-def delete_car(vin: int = Path(lt=10 ** 18, ge=10 * 17)):
+def delete_car(vin):
+    car = Car()
     if str(vin) in cars.keys():
         vin1 = vin
         del cars[str(vin)]
