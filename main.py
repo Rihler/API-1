@@ -84,7 +84,7 @@ def read_data_car(vin):
     return "Данного автомобиля не существует"
 
 
-@app.put("/update/car/{vin}/")
+@app.put("/update/car/{vin}/{brand}/{model}/{year}")
 def update_data_car(vin, brand, model, year):
     car = Car(vin, brand, model, year)
     car.valid_car()
