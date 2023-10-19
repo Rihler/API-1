@@ -124,7 +124,7 @@ class People(object):
         if len(self.address) < 10:
             self.errors["address"] = "Адрес должен содержать не менее 10 символов"
 
-@app.post("/people/{phone}/{name}/{second_name}/{address}/")
+@app.post("/people/{phone}/{name}/{second_name}/{address}")
 def append_people(phone, name, second_name, address):
     pep = People(phone, name, second_name, address)
     pep.valid_people()
@@ -146,7 +146,7 @@ def read_data_peoples(phone):
     return "Данного пользователя не существует"
 
 
-@app.put("/update/people/{phone}/{name}/{second_name}/{address}/")
+@app.put("/update/people/{phone}/{name}/{second_name}/{address}")
 def update_data_people(phone, name, second_name, address):
     pep = People(phone, name, second_name, address)
     pep.valid_people()
