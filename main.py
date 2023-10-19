@@ -220,7 +220,7 @@ def append_order(phone, vin, date, work, status):
     return "Данный заказ уже существует"
 
 
-@app.delete("/orders{phone}/{vin}")
+@app.delete("/orders/{phone}/{vin}")
 def delete_order(phone, vin):
     order = Order(phone, vin)
     for i in order.errors:
