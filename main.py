@@ -150,7 +150,8 @@ def append_people(item: People):
     for i in pep.errors:
         if pep.errors[i] != "valid":
             return pep.errors
-    return post_data(item.phone, item.name, item.second_name, item.address, "Name", "Second_name", "Address", peoples, 0)
+    return post_data(item.phone, item.name, item.second_name, item.address, "Name", "Second_name", "Address", peoples,
+                     0)
 
 
 @app.delete("/peoples/{phone}")
@@ -180,12 +181,15 @@ orders = []
 
 people_car = {}
 
+
 class Order(BaseModel):
     phone: str
     vin: str
     date: str
     work: str
     status: str
+
+
 class Order_valid(object):
     def __init__(self, phone, vin, date="10.12.2023", work="что - то", status='завершен'):
         self.lst_status = ["завершен", "в процессе", "ожидает ремонта"]
@@ -209,7 +213,7 @@ class Order_valid(object):
             self.errors["phone"] = "Номер должен начинаться с + и содержать 11 цифр"
 
         if len(self.vin) != 17 or "I" in self.vin or "O" in self.vin or "Q" in self.vin or not (
-                self.valid_sym(self.vin)):
+        self.valid_sym(self.vin)):
             self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
  и его длина должна быть 17 символов"
 
@@ -223,13 +227,14 @@ class Order_valid(object):
             if not (date1[0].isdigit()) or not (date1[1].isdigit()) or not (date1[2].isdigit()):
                 self.errors["date"] = "Дата должна иметь формат день.номер_месяца.год"
         if len(date1) == 3 and date1[0].isdigit() and date1[1].isdigit() and date1[0].isdigit():
-            if not (1 <= int(date1[0]) <= 31) or (1 <= (date1[1]) <= 12) or not (1950 <= date1[2] <= 2023):
+            if not (1 <= int(date1[0]) <= 31) or (1 <= int(date1[1]) <= 12) or not (1950 <= int(date1[2]) <= 2023):
                 self.errors["date"] = "Месяц должен быть в пределах (1, 31), месяц - (1,12), год - (1950, 2023)"
 
 
 @app.post("/orders")
 def append_order(item: Order):
     order = Order_valid(item.phone, item.vin, item.date, item.work, item.status)
+    order.valid_order()
     for i in order.errors:
         if order.errors[i] != "valid":
             return order.errors
@@ -311,5 +316,4 @@ def read_pep_order(phone):
     if len(a) != 0:
         return a
     return "Заказов на данного пользователя нет"
-
 
