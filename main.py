@@ -72,7 +72,7 @@ def append_car(vin, brand, model, year):
     return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 0)
 
 
-@app.delete('/cars')
+@app.delete('/cars/{vin}')
 def delete_car(vin):
     return delete_data(vin, cars)
 
@@ -84,7 +84,7 @@ def read_data_car(vin):
     return "Данного автомобиля не существует"
 
 
-@app.put("/cars")
+@app.put("/cars/{vin}")
 def update_data_car(vin, brand, model, year):
     car = Car(vin, brand, model, year)
     car.valid_car()
@@ -134,7 +134,7 @@ def append_people(phone, name, second_name, address):
     return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 0)
 
 
-@app.delete("/peoples")
+@app.delete("/peoples/{phone}")
 def delete_people(phone):
     return delete_data(phone, peoples)
 
@@ -146,7 +146,7 @@ def read_data_peoples(phone):
     return "Данного пользователя не существует"
 
 
-@app.put("peoples")
+@app.put("/peoples/{phone}")
 def update_data_people(phone, name, second_name, address):
     pep = People(phone, name, second_name, address)
     pep.valid_people()
@@ -220,7 +220,7 @@ def append_order(phone, vin, date, work, status):
     return "Данный заказ уже существует"
 
 
-@app.delete("/orders")
+@app.delete("/orders{phone}/{vin}")
 def delete_order(phone, vin):
     order = Order(phone, vin)
     for i in order.errors:
@@ -237,7 +237,7 @@ def delete_order(phone, vin):
     return "Данного заказа нет в базе данных"
 
 
-@app.put("/orders")
+@app.put("/orders/{phone}/{vin}")
 def update_order(phone, vin, status):
     order = Order(phone, vin)
     for i in order.errors:
@@ -255,7 +255,7 @@ def update_order(phone, vin, status):
 
 
 
-@app.get("/orders{phone}/{vin}")
+@app.get("/orders/{phone}/{vin}")
 def read_data_order(phone, vin):
     for x in orders:
         for y in x:
