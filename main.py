@@ -46,7 +46,7 @@ class Car(object):
                 self.valid_sym(self.vin)):
             self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
  и его длина должна быть 17 символов"
-        if not (self.brand.isdigit()) or not (self.brand[0].isalpha()) or not (self.valid_sym(self.brand)):
+        if not(self.brand.isdigit()) or self.brand[0].isalpha() or not(self.valid_sym(self.brand)):
             self.errors["brand"] = "Марка не должна содержать спец.\
 символы и цифры и не должна начинаться с цифр "
         flag = True
