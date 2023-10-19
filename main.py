@@ -77,9 +77,11 @@ def delete_car(vin):
     return delete_data(vin, cars)
 
 
-@app.get('/read/cars/')
-def read_data_car():
-    return cars
+@app.get('/read/car/{vin}')
+def read_data_car(vin):
+    if vin in cars:
+        return {vin: cars[vin]}
+    return "Данного автомобиля не существует"
 
 
 @app.put("/update/car/{vin}/")
@@ -137,9 +139,11 @@ def delete_people(phone):
     return delete_data(phone, peoples)
 
 
-@app.get("/read/peoples")
-def read_data_peoples():
-    return peoples
+@app.get("/read/people{phone}")
+def read_data_peoples(phone):
+    if phone in peoples:
+        return {phone: peoples[phone]}
+    return "Данного пользователя не существует"
 
 
 @app.put("/update/people/{phone}/{name}/{second_name}/{address}/")
@@ -153,9 +157,11 @@ def update_data_people(phone, name, second_name, address):
 
 orders = []
 
+people_car={}
+
 class Order(object):
-    def __init__(self, phone, vin, date, work, status):
-            self.lst_status=["завершен", "в процессе", "ожидает ремонта"]
+    def __init__(self, phone, vin, date="10.12.2023", work="что - то", status='завершен'):
+            self.lst_status = ["завершен", "в процессе", "ожидает ремонта"]
             self.phone = phone
             self.vin = vin.upper()
             self.date = date
@@ -206,6 +212,10 @@ def append_order(phone, vin, date, work, status):
             return "Заказ на данный автомобиль уже существует"
     if st not in orders:
         orders.append(st)
+        if phone in people_car:
+            people_car[phone]. append(vin)
+        else:
+            people_car[phone] = [vin]
         return st
     return "Данный заказ уже существует"
 
@@ -216,14 +226,57 @@ def delete_order(phone, vin):
     for i in order.errors:
         if order.errors[i] != "valid":
             return order.errors
+    order1 = 0
+    for x in orders:
+        for y in x:
+            if [x[y]["vin"], y] == [vin, phone]:
+                order1 = x
+    if order1 != 0:
+        orders.remove(order1)
+        return "order is deleted"
+    return "Данного заказа нет в базе данных"
 
+
+@app.put("/update/order/{phone}/{vin}/{status}")
+def update_order(phone, vin, status):
+    order = Order(phone, vin)
+    for i in order.errors:
+        if order.errors[i] != "valid":
+            return order.errors
+    order1 = 0
+    for x in orders:
+        for y in x:
+            if [x[y]["vin"], y] == [vin, phone]:
+                order1 = x
+    if order1 != 0:
+        order1[phone]["status"] = status
+        return "order is update"
+    return "Данного заказа нет в базе данных"
 
 
 
 @app.get("/read/order/{phone}/{vin}")
 def read_data_order(phone, vin):
     for x in orders:
-        if x == phone and x[phone] == vin:
-            return {peoples[phone]: x[phone]}
+        for y in x:
+            if y == phone and x[y]["vin"] == vin:
+                return {y: x[y]}
     return "Данного закаказа нет"
 
+@app.get("/read/people_car/{phone}")
+def read_pep_car(phone):
+    if phone not in people_car:
+        return "Данного пользователя нет"
+    else:
+        return {phone: people_car[phone]}
+
+@app.get("/read/people_order/{phone}")
+def read_pep_order(phone):
+    a = []
+    for x in orders:
+        for y in x:
+            if y == phone:
+                a.append(x)
+    if len(a) != 0:
+        return a
+    return "Заказов на данного пользователя нет"
