@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -26,7 +27,14 @@ def post_data(par1, par2, par3, par4, key2, key3, key4, dict_data, put):
         return f"{par1} does not exist in the database"
 
 
-class Car(object):
+class Car(BaseModel):
+    vin: str
+    model: str
+    brand: str
+    year: int
+
+
+class Car_valid(object):
     def __init__(self, vin, model=None, brand=None, year=None):
         self.vin = vin.upper()
         self.model = model
@@ -46,7 +54,7 @@ class Car(object):
                 self.valid_sym(self.vin)):
             self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
  и его длина должна быть 17 символов"
-        if not(self.brand.isalpha()) or not(self.valid_sym(self.brand)):
+        if not (self.brand.isalpha()) or not (self.valid_sym(self.brand)):
             self.errors["brand"] = "Марка не должна содержать спец.\
 символы и цифры и не должна начинаться с цифр "
         flag = True
@@ -60,16 +68,15 @@ class Car(object):
             self.errors["vin"] = "Модель не должна содержать спец. символы"
 
 
-# CRUD для автомобилей
-
 @app.post('/cars')
-def append_car(vin, brand, model, year):
-    car = Car(vin, model, brand, year)
+def append_car(item: Car):
+    car = Car_valid(str(item.vin), item.model, item.brand, str(item.year))
     car.valid_car()
     for i in car.errors:
         if car.errors[i] != "valid":
             return car.errors
-    return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 0)
+    return post_data(str(item.vin), item.model.lower(), item.brand.lower(), str(item.year), "Model", "Brand", "Year",
+                     cars, 0)
 
 
 @app.delete('/cars/{vin}')
@@ -84,19 +91,28 @@ def read_data_car(vin):
     return "Данного автомобиля не существует"
 
 
-@app.put("/cars/{vin}")
-def update_data_car(vin, brand, model, year):
-    car = Car(vin, brand, model, year)
+@app.put("/cars")
+def update_data_car(item: Car):
+    car = Car_valid(str(item.vin), item.brand, item.model, str(item.year))
     car.valid_car()
     for i in car.errors:
         if car.errors[i] != "valid":
             return car.errors
-    return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 1)
+    return post_data(str(item.vin), item.model.lower(), item.brand.lower(), item.year, "Model", "Brand", "Year", cars,
+                     1)
 
 
 peoples = {}
 
-class People(object):
+
+class People(BaseModel):
+    phone: str
+    name: str
+    second_name: str
+    address: str
+
+
+class People_valid(object):
     def __init__(self, phone, name=None, second_name=None, address=None):
         self.phone = phone
         self.name = name.capitalize()
@@ -112,26 +128,29 @@ class People(object):
         return True
 
     def valid_people(self):
-        if not(self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not(self.valid_sym(self.phone[1:])):
+        if not (self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not (
+                self.valid_sym(self.phone[1:])):
             self.errors["phone"] = "Номер должен начинаться с + и содержать 11 цифр"
 
-        if not(self.valid_sym(self.name)) or not(self.name.isalpha()) or len(self.name) < 3:
+        if not (self.valid_sym(self.name)) or not (self.name.isalpha()) or len(self.name) < 3:
             self.errors["name"] = "Имя не должно содержать спец. символы и цифры, длина имени 3 сим. минимум"
 
-        if not(self.valid_sym(self.second_name)) or not(self.second_name.isalpha()) or len(self.second_name) < 3:
-            self.errors["second_name"] = "Фамилия не должна содержать спец. символы и цифры, длина фамилии 3 сим. минимум"
+        if not (self.valid_sym(self.second_name)) or not (self.second_name.isalpha()) or len(self.second_name) < 3:
+            self.errors[
+                "second_name"] = "Фамилия не должна содержать спец. символы и цифры, длина фамилии 3 сим. минимум"
 
         if len(self.address) < 10:
             self.errors["address"] = "Адрес должен содержать не менее 10 символов"
 
+
 @app.post("/peoples")
-def append_people(phone, name, second_name, address):
-    pep = People(phone, name, second_name, address)
+def append_people(item: People):
+    pep = People_valid(item.phone, item.name, item.second_name, item.address)
     pep.valid_people()
     for i in pep.errors:
         if pep.errors[i] != "valid":
             return pep.errors
-    return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 0)
+    return post_data(item.phone, item.name, item.second_name, item.address, "Name", "Second_name", "Address", peoples, 0)
 
 
 @app.delete("/peoples/{phone}")
@@ -146,28 +165,37 @@ def read_data_peoples(phone):
     return "Данного пользователя не существует"
 
 
-@app.put("/peoples/{phone}")
-def update_data_people(phone, name, second_name, address):
-    pep = People(phone, name, second_name, address)
+@app.put("/peoples")
+def update_data_people(item: People):
+    pep = People_valid(item.phone, item.name, item.second_name, item.address)
     pep.valid_people()
     for i in pep.errors:
         if pep.errors[i] != "valid":
             return pep.errors
-    return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 1)
+    return post_data(item.phone, item.name, item.second_name, item.address, "Name", "Second_name", "Address", peoples,
+                     1)
+
 
 orders = []
 
-people_car={}
+people_car = {}
 
-class Order(object):
+class Order(BaseModel):
+    phone: str
+    vin: str
+    date: str
+    work: str
+    status: str
+class Order_valid(object):
     def __init__(self, phone, vin, date="10.12.2023", work="что - то", status='завершен'):
-            self.lst_status = ["завершен", "в процессе", "ожидает ремонта"]
-            self.phone = phone
-            self.vin = vin.upper()
-            self.date = date
-            self.work = work.lower()
-            self.status = status.lower()
-            self.errors = {"phone": "valid", "vin": "valid", "date": "valid", "work": "valid", "status": "valid"}
+        self.lst_status = ["завершен", "в процессе", "ожидает ремонта"]
+        self.phone = phone
+        self.vin = vin.upper()
+        self.date = date
+        self.work = work.lower()
+        self.status = status.lower()
+        self.errors = {"phone": "valid", "vin": "valid", "date": "valid", "work": "valid", "status": "valid"}
+
     def valid_sym(self, string):
         error_syms = "_/€&#@%~;:|[] <>{}^*-+=(),"
         for x in error_syms:
@@ -177,7 +205,7 @@ class Order(object):
 
     def valid_order(self):
         if not (self.phone[1:].isdigit()) or len(self.phone[1:]) != 11 or self.phone[0] != "+" or not (
-        self.valid_sym(self.phone[1:])):
+                self.valid_sym(self.phone[1:])):
             self.errors["phone"] = "Номер должен начинаться с + и содержать 11 цифр"
 
         if len(self.vin) != 17 or "I" in self.vin or "O" in self.vin or "Q" in self.vin or not (
@@ -188,41 +216,43 @@ class Order(object):
         if self.status not in self.lst_status:
             self.errors["status"] = 'Статус может быть только \"завершен\", \"в процессе\", \"ожидает ремонта\" '
 
-        date1= self.date.replace(" ","").split(".")
+        date1 = self.date.replace(" ", "").split(".")
         if len(date1) != 3:
             self.errors["date"] = "Дата должна иметь формат день.номер_месяца.год"
         if len(date1) == 3:
-            if not(date1[0].isdigit()) or not(date1[1].isdigit()) or not(date1[2].isdigit()):
+            if not (date1[0].isdigit()) or not (date1[1].isdigit()) or not (date1[2].isdigit()):
                 self.errors["date"] = "Дата должна иметь формат день.номер_месяца.год"
         if len(date1) == 3 and date1[0].isdigit() and date1[1].isdigit() and date1[0].isdigit():
-            if not(1<=int(date1[0]) <= 31) or (1<=(date1[1]) <=12) or  not(1950 <= date1[2] <=2023):
+            if not (1 <= int(date1[0]) <= 31) or (1 <= (date1[1]) <= 12) or not (1950 <= date1[2] <= 2023):
                 self.errors["date"] = "Месяц должен быть в пределах (1, 31), месяц - (1,12), год - (1950, 2023)"
+
+
 @app.post("/orders")
-def append_order(phone, vin, date, work, status):
-    order = Order(phone, vin, date, work, status)
+def append_order(item: Order):
+    order = Order_valid(item.phone, item.vin, item.date, item.work, item.status)
     for i in order.errors:
         if order.errors[i] != "valid":
             return order.errors
-    st = {phone: {"vin": vin, "date": date, "work": work, "status": status}}
+    st = {item.phone: {"vin": item.vin, "date": item.date, "work": item.work, "status": item.status}}
     a = []
     for x in orders:
         for y in x:
             a.append(x[y]["vin"])
-        if vin in a:
+        if item.vin in a:
             return "Заказ на данный автомобиль уже существует"
     if st not in orders:
         orders.append(st)
-        if phone in people_car:
-            people_car[phone]. append(vin)
+        if item.phone in people_car:
+            people_car[item.phone].append(item.vin)
         else:
-            people_car[phone] = [vin]
+            people_car[item.phone] = [item.vin]
         return st
     return "Данный заказ уже существует"
 
 
 @app.delete("/orders/{phone}/{vin}")
 def delete_order(phone, vin):
-    order = Order(phone, vin)
+    order = Order_valid(phone, vin)
     for i in order.errors:
         if order.errors[i] != "valid":
             return order.errors
@@ -237,22 +267,21 @@ def delete_order(phone, vin):
     return "Данного заказа нет в базе данных"
 
 
-@app.put("/orders/{phone}/{vin}")
-def update_order(phone, vin, status):
-    order = Order(phone, vin)
+@app.put("/orders")
+def update_order(item: Order):
+    order = Order_valid(item.phone, item.vin, item.status)
     for i in order.errors:
         if order.errors[i] != "valid":
             return order.errors
     order1 = 0
     for x in orders:
         for y in x:
-            if [x[y]["vin"], y] == [vin, phone]:
+            if [x[y]["vin"], y] == [item.vin, item.phone]:
                 order1 = x
     if order1 != 0:
-        order1[phone]["status"] = status
+        order1[item.phone]["status"] = item.status
         return "order is update"
     return "Данного заказа нет в базе данных"
-
 
 
 @app.get("/orders/{phone}/{vin}")
@@ -263,12 +292,14 @@ def read_data_order(phone, vin):
                 return {y: x[y]}
     return "Данного закаказа нет"
 
+
 @app.get("/carlist/{phone}")
 def read_pep_car(phone):
     if phone not in people_car:
         return "Данного пользователя нет"
     else:
         return {phone: people_car[phone]}
+
 
 @app.get("/orderlist/{phone}")
 def read_pep_order(phone):
