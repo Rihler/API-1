@@ -62,7 +62,7 @@ class Car(object):
 
 # CRUD для автомобилей
 
-@app.post('/car')
+@app.post('/cars')
 def append_car(vin, brand, model, year):
     car = Car(vin, model, brand, year)
     car.valid_car()
@@ -72,19 +72,19 @@ def append_car(vin, brand, model, year):
     return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 0)
 
 
-@app.delete('/delete/car')
+@app.delete('/cars')
 def delete_car(vin):
     return delete_data(vin, cars)
 
 
-@app.get('/read/car')
+@app.get('/cars')
 def read_data_car(vin):
     if vin in cars:
         return {vin: cars[vin]}
     return "Данного автомобиля не существует"
 
 
-@app.put("/update/car")
+@app.put("/cars")
 def update_data_car(vin, brand, model, year):
     car = Car(vin, brand, model, year)
     car.valid_car()
@@ -124,7 +124,7 @@ class People(object):
         if len(self.address) < 10:
             self.errors["address"] = "Адрес должен содержать не менее 10 символов"
 
-@app.post("/people")
+@app.post("/peoples")
 def append_people(phone, name, second_name, address):
     pep = People(phone, name, second_name, address)
     pep.valid_people()
@@ -134,19 +134,19 @@ def append_people(phone, name, second_name, address):
     return post_data(phone, name, second_name, address, "Name", "Second_name", "Address", peoples, 0)
 
 
-@app.delete("/delete/people")
+@app.delete("/peoples")
 def delete_people(phone):
     return delete_data(phone, peoples)
 
 
-@app.get("/read/people")
+@app.get("/peoples")
 def read_data_peoples(phone):
     if phone in peoples:
         return {phone: peoples[phone]}
     return "Данного пользователя не существует"
 
 
-@app.put("/update/people")
+@app.put("peoples")
 def update_data_people(phone, name, second_name, address):
     pep = People(phone, name, second_name, address)
     pep.valid_people()
@@ -197,7 +197,7 @@ class Order(object):
         if len(date1) == 3 and date1[0].isdigit() and date1[1].isdigit() and date1[0].isdigit():
             if not(1<=int(date1[0]) <= 31) or (1<=(date1[1]) <=12) or  not(1950 <= date1[2] <=2023):
                 self.errors["date"] = "Месяц должен быть в пределах (1, 31), месяц - (1,12), год - (1950, 2023)"
-@app.post("/order")
+@app.post("/orders")
 def append_order(phone, vin, date, work, status):
     order = Order(phone, vin, date, work, status)
     for i in order.errors:
@@ -220,7 +220,7 @@ def append_order(phone, vin, date, work, status):
     return "Данный заказ уже существует"
 
 
-@app.delete("/delete/order")
+@app.delete("/orders")
 def delete_order(phone, vin):
     order = Order(phone, vin)
     for i in order.errors:
@@ -237,7 +237,7 @@ def delete_order(phone, vin):
     return "Данного заказа нет в базе данных"
 
 
-@app.put("/update/order")
+@app.put("/orders")
 def update_order(phone, vin, status):
     order = Order(phone, vin)
     for i in order.errors:
@@ -255,7 +255,7 @@ def update_order(phone, vin, status):
 
 
 
-@app.get("/read/order")
+@app.get("/orders")
 def read_data_order(phone, vin):
     for x in orders:
         for y in x:
@@ -263,14 +263,14 @@ def read_data_order(phone, vin):
                 return {y: x[y]}
     return "Данного закаказа нет"
 
-@app.get("/read/people_car")
+@app.get("/carlist")
 def read_pep_car(phone):
     if phone not in people_car:
         return "Данного пользователя нет"
     else:
         return {phone: people_car[phone]}
 
-@app.get("/read/people_order")
+@app.get("/orderlist")
 def read_pep_order(phone):
     a = []
     for x in orders:
