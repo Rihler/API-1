@@ -46,7 +46,7 @@ class Car(object):
                 self.valid_sym(self.vin)):
             self.errors["vin"] = "Vin код не должен содержать I, Q, O и спец. знаков\
  и его длина должна быть 17 символов"
-        if not(self.brand.isdigit()) or not(self.brand.isalpha()) or not(self.valid_sym(self.brand)):
+        if not(self.brand.isalpha()) or not(self.valid_sym(self.brand)):
             self.errors["brand"] = "Марка не должна содержать спец.\
 символы и цифры и не должна начинаться с цифр "
         flag = True
@@ -91,7 +91,7 @@ def update_data_car(vin, brand, model, year):
     for i in car.errors:
         if car.errors[i] != "valid":
             return car.errors
-    return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 0)
+    return post_data(vin, model.lower(), brand.lower(), year, "Model", "Brand", "Year", cars, 1)
 
 
 peoples = {}
