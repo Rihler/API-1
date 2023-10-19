@@ -77,7 +77,7 @@ def delete_car(vin):
     return delete_data(vin, cars)
 
 
-@app.get('/cars')
+@app.get('/cars/{vin}')
 def read_data_car(vin):
     if vin in cars:
         return {vin: cars[vin]}
@@ -139,7 +139,7 @@ def delete_people(phone):
     return delete_data(phone, peoples)
 
 
-@app.get("/peoples")
+@app.get("/peoples/{phone}")
 def read_data_peoples(phone):
     if phone in peoples:
         return {phone: peoples[phone]}
@@ -255,7 +255,7 @@ def update_order(phone, vin, status):
 
 
 
-@app.get("/orders")
+@app.get("/orders{phone}/{vin}")
 def read_data_order(phone, vin):
     for x in orders:
         for y in x:
@@ -263,14 +263,14 @@ def read_data_order(phone, vin):
                 return {y: x[y]}
     return "Данного закаказа нет"
 
-@app.get("/carlist")
+@app.get("/carlist/{phone}")
 def read_pep_car(phone):
     if phone not in people_car:
         return "Данного пользователя нет"
     else:
         return {phone: people_car[phone]}
 
-@app.get("/orderlist")
+@app.get("/orderlist/{phone}")
 def read_pep_order(phone):
     a = []
     for x in orders:
